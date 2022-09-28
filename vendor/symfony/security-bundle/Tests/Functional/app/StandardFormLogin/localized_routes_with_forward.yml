@@ -1,0 +1,10 @@
+imports:
+    - { resource: ./localized_routes.yml }
+
+security:
+    enable_authenticator_manager: true
+    firewalls:
+        default:
+            form_login:
+                use_forward: true
+                failure_forward: true

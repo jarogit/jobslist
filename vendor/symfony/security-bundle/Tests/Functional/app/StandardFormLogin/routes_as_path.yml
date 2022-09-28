@@ -1,0 +1,14 @@
+imports:
+    - { resource: ./base_config.yml }
+
+security:
+    enable_authenticator_manager: true
+    firewalls:
+        default:
+            form_login:
+                login_path: form_login
+                check_path: form_login_check
+                default_target_path: form_login_default_target_path
+            logout:
+                path: form_logout
+                target: form_login_homepage

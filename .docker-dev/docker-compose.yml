@@ -1,0 +1,41 @@
+version: "3.6"
+services:
+    recruitis-nginx:
+        depends_on:
+            - recruitis-php
+        build:
+            context: ./nginx
+            args:
+                DOCKER_UID: ${DOCKER_UID}
+                DOCKER_GID: ${DOCKER_GID}
+                DOCKER_USER: ${DOCKER_USER}
+        container_name: recruitis-nginx
+        ports:
+          - "80:80"
+          - "443:443"
+        working_dir: /sources
+        volumes:
+            - ./..:/sources:cached
+            - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+            - ./nginx/nginx-selfsigned.key:/etc/ssl/private/nginx-selfsigned.key
+            - ./nginx/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt
+        networks:
+            - network-recruitis
+
+    recruitis-php:
+        build:
+            context: ./php
+            args:
+                DOCKER_UID: ${DOCKER_UID}
+                DOCKER_GID: ${DOCKER_GID}
+                DOCKER_USER: ${DOCKER_USER}
+        container_name: recruitis-php
+        working_dir: /sources
+        volumes:
+            - ./..:/sources:cached
+        networks:
+            - network-recruitis
+
+networks:
+    network-recruitis:
+        name: network-recruitis

@@ -1,0 +1,10 @@
+imports:
+    - { resource: ./base_config.yml }
+
+security:
+    enable_authenticator_manager: true
+    firewalls:
+        default:
+            form_login:
+                enable_csrf: true
+                csrf_parameter: "user_login[_token]"

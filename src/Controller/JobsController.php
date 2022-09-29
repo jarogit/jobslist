@@ -15,7 +15,7 @@ class JobsController extends AbstractController
     #[Route('/jobs/{page<\d+>?1}', methods: ['GET'])]
     public function list(int $page, RecruitisApi $api, PaginatorInterface $paginator): Response
     {
-        $reader = new class($api) implements IPageLoader {
+        $loader = new class($api) implements IPageLoader {
             public function __construct(private RecruitisApi $api) {}
             public function load(int $page, int $itemsPerPage): PaginateLoaderResultDto
             {
@@ -23,7 +23,7 @@ class JobsController extends AbstractController
             }
         };
 
-        $pagination = $paginator->paginate($reader, $page);
+        $pagination = $paginator->paginate($loader, $page);
 
         return $this->render('job/list.html.twig', ['pagination' => $pagination]);
     }

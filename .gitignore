@@ -1,3 +1,4 @@
 /.docker-dev/.env
 /.docker-dev/docker-compose.override.yml
 /.docker-dev/locals
+/.env.local

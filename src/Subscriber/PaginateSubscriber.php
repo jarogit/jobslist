@@ -22,6 +22,9 @@ class PaginateSubscriber implements EventSubscriberInterface
 
         $event->items = $dto->items;
         $event->count = $dto->total;
+        if (!$dto->isOk) {
+            $event->setCustomPaginationParameter(IPageLoader::ERROR_PARAM, true);
+        }
 
         $event->stopPropagation();
     }

@@ -10,12 +10,16 @@ stop:
 	docker-compose stop
 ps:
 	docker-compose ps
+cache:
+	docker-compose exec recruitis-php find /tmp/symfony-cache/ -type f -exec rm -f {} + ;
 bash:
 	docker-compose exec recruitis-php bash
 bashr:
 	docker-compose exec --user root recruitis-php bash
 bashw:
 	docker-compose exec recruitis-nginx ash
+log:
+	tail -F ../var/log/dev.log
 logp:
 	docker-compose logs recruitis-php
 logw:

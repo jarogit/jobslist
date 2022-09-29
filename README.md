@@ -1,1 +1,1 @@
-# jobslist
+# recruitis.io API client

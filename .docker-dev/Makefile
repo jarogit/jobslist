@@ -26,3 +26,5 @@ logw:
 	docker-compose logs recruitis-nginx
 build:
 	docker-compose up -d --build --force-recreate
+test:
+	docker-compose exec recruitis-php php bin/phpunit

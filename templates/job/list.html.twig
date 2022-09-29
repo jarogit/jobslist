@@ -30,6 +30,10 @@
         {% endfor %}
     </table>
 
+    {% if pagination.getCustomParameters(constant('\\App\\Service\\IPageLoader::ERROR_PARAM')) %}
+        {{ 'Data loading error' }}
+    {% endif %}
+
     <div class="navigation">
         {{ knp_pagination_render(pagination) }}
     </div>

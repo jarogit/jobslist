@@ -17,6 +17,7 @@ class NestedConfig
     private $_usedProperties = [];
 
     /**
+     * @default {"enabled":null}
      * @return \Symfony\Config\ScalarNormalizedTypes\Nested\NestedObjectConfig|$this
      */
     public function nestedObject(mixed $value = []): \Symfony\Config\ScalarNormalizedTypes\Nested\NestedObjectConfig|static

@@ -19,6 +19,7 @@ use Symfony\Component\Cache\Adapter\DoctrineAdapter;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use Symfony\Component\Mailer\Mailer;
@@ -32,7 +33,7 @@ class ConfigurationTest extends TestCase
     public function testDefaultConfig()
     {
         $processor = new Processor();
-        $config = $processor->processConfiguration(new Configuration(true), [['secret' => 's3cr3t']]);
+        $config = $processor->processConfiguration(new Configuration(true), [['http_method_override' => false, 'secret' => 's3cr3t']]);
 
         $this->assertEquals(self::getBundleDefaultConfig(), $config);
     }
@@ -56,7 +57,7 @@ class ConfigurationTest extends TestCase
         $processor = new Processor();
         $processor->processConfiguration(
             new Configuration(true),
-            [['session' => ['name' => $sessionName]]]
+            [['http_method_override' => false, 'session' => ['name' => $sessionName]]]
         );
     }
 
@@ -76,7 +77,7 @@ class ConfigurationTest extends TestCase
     {
         $processor = new Processor();
         $configuration = new Configuration(true);
-        $config = $processor->processConfiguration($configuration, [['assets' => null]]);
+        $config = $processor->processConfiguration($configuration, [['http_method_override' => false, 'assets' => null]]);
 
         $defaultConfig = [
             'enabled' => true,
@@ -102,6 +103,7 @@ class ConfigurationTest extends TestCase
         $configuration = new Configuration(true);
         $config = $processor->processConfiguration($configuration, [
             [
+                'http_method_override' => false,
                 'assets' => [
                     'packages' => [
                         $packageName => [],
@@ -134,6 +136,7 @@ class ConfigurationTest extends TestCase
         $configuration = new Configuration(true);
         $processor->processConfiguration($configuration, [
                 [
+                    'http_method_override' => false,
                     'assets' => $assetConfig,
                 ],
             ]);
@@ -183,6 +186,7 @@ class ConfigurationTest extends TestCase
         $configuration = new Configuration(true);
         $config = $processor->processConfiguration($configuration, [
             [
+                'http_method_override' => false,
                 'lock' => $lockConfig,
             ],
         ]);
@@ -243,11 +247,13 @@ class ConfigurationTest extends TestCase
         $configuration = new Configuration(true);
         $config = $processor->processConfiguration($configuration, [
             [
+                'http_method_override' => false,
                 'lock' => [
                     'payload' => 'flock',
                 ],
             ],
             [
+                'http_method_override' => false,
                 'lock' => [
                     'payload' => 'semaphore',
                 ],
@@ -265,6 +271,58 @@ class ConfigurationTest extends TestCase
         );
     }
 
+    /**
+     * @dataProvider provideValidSemaphoreConfigurationTests
+     */
+    public function testValidSemaphoreConfiguration($semaphoreConfig, $processedConfig)
+    {
+        $processor = new Processor();
+        $configuration = new Configuration(true);
+        $config = $processor->processConfiguration($configuration, [
+            [
+                'http_method_override' => false,
+                'semaphore' => $semaphoreConfig,
+            ],
+        ]);
+
+        $this->assertArrayHasKey('semaphore', $config);
+
+        $this->assertEquals($processedConfig, $config['semaphore']);
+    }
+
+    public function provideValidSemaphoreConfigurationTests()
+    {
+        yield [null, ['enabled' => true, 'resources' => []]];
+
+        yield ['redis://default', ['enabled' => true, 'resources' => ['default' => 'redis://default']]];
+        yield [['foo' => 'redis://foo', 'bar' => 'redis://bar'], ['enabled' => true, 'resources' => ['foo' => 'redis://foo', 'bar' => 'redis://bar']]];
+        yield [['default' => 'redis://default'], ['enabled' => true, 'resources' => ['default' => 'redis://default']]];
+
+        yield [['enabled' => false, 'redis://default'], ['enabled' => false, 'resources' => ['default' => 'redis://default']]];
+        yield [['enabled' => false, 'foo' => 'redis://foo', 'bar' => 'redis://bar'], ['enabled' => false, 'resources' => ['foo' => 'redis://foo', 'bar' => 'redis://bar']]];
+        yield [['enabled' => false, 'default' => 'redis://default'], ['enabled' => false, 'resources' => ['default' => 'redis://default']]];
+
+        yield [['resources' => 'redis://default'], ['enabled' => true, 'resources' => ['default' => 'redis://default']]];
+        yield [['resources' => ['foo' => 'redis://foo', 'bar' => 'redis://bar']], ['enabled' => true, 'resources' => ['foo' => 'redis://foo', 'bar' => 'redis://bar']]];
+        yield [['resources' => ['default' => 'redis://default']], ['enabled' => true, 'resources' => ['default' => 'redis://default']]];
+
+        yield [['enabled' => false, 'resources' => 'redis://default'], ['enabled' => false, 'resources' => ['default' => 'redis://default']]];
+        yield [['enabled' => false, 'resources' => ['foo' => 'redis://foo', 'bar' => 'redis://bar']], ['enabled' => false, 'resources' => ['foo' => 'redis://foo', 'bar' => 'redis://bar']]];
+        yield [['enabled' => false, 'resources' => ['default' => 'redis://default']], ['enabled' => false, 'resources' => ['default' => 'redis://default']]];
+
+        // xml
+
+        yield [['resource' => ['redis://default']], ['enabled' => true, 'resources' => ['default' => 'redis://default']]];
+        yield [['resource' => ['redis://default', ['name' => 'foo', 'value' => 'redis://default']]], ['enabled' => true, 'resources' => ['default' => 'redis://default', 'foo' => 'redis://default']]];
+        yield [['resource' => [['name' => 'foo', 'value' => 'redis://default']]], ['enabled' => true, 'resources' => ['foo' => 'redis://default']]];
+        yield [['resource' => [['name' => 'foo', 'value' => 'redis://default'], ['name' => 'bar', 'value' => 'redis://default']]], ['enabled' => true, 'resources' => ['foo' => 'redis://default', 'bar' => 'redis://default']]];
+
+        yield [['enabled' => false, 'resource' => ['redis://default']], ['enabled' => false, 'resources' => ['default' => 'redis://default']]];
+        yield [['enabled' => false, 'resource' => ['redis://default', ['name' => 'foo', 'value' => 'redis://default']]], ['enabled' => false, 'resources' => ['default' => 'redis://default', 'foo' => 'redis://default']]];
+        yield [['enabled' => false, 'resource' => [['name' => 'foo', 'value' => 'redis://default']]], ['enabled' => false, 'resources' => ['foo' => 'redis://default']]];
+        yield [['enabled' => false, 'resource' => [['name' => 'foo', 'value' => 'redis://foo'], ['name' => 'bar', 'value' => 'redis://bar']]], ['enabled' => false, 'resources' => ['foo' => 'redis://foo', 'bar' => 'redis://bar']]];
+    }
+
     public function testItShowANiceMessageIfTwoMessengerBusesAreConfiguredButNoDefaultBus()
     {
         $expectedMessage = 'You must specify the "default_bus" if you define more than one bus.';
@@ -275,6 +333,7 @@ class ConfigurationTest extends TestCase
 
         $processor->processConfiguration($configuration, [
             'framework' => [
+                'http_method_override' => false,
                 'messenger' => [
                     'default_bus' => null,
                     'buses' => [
@@ -292,6 +351,7 @@ class ConfigurationTest extends TestCase
         $configuration = new Configuration(true);
         $config = $processor->processConfiguration($configuration, [
             [
+                'http_method_override' => false,
                 'messenger' => [
                     'default_bus' => 'existing_bus',
                     'buses' => [
@@ -306,6 +366,7 @@ class ConfigurationTest extends TestCase
                 ],
             ],
             [
+                'http_method_override' => false,
                 'messenger' => [
                     'buses' => [
                         'common_bus' => [
@@ -354,6 +415,7 @@ class ConfigurationTest extends TestCase
 
         $processor->processConfiguration($configuration, [
             [
+                'http_method_override' => false,
                 'messenger' => [
                     'default_bus' => 'foo',
                     'buses' => [
@@ -368,8 +430,9 @@ class ConfigurationTest extends TestCase
     protected static function getBundleDefaultConfig()
     {
         return [
-            'http_method_override' => true,
-            'ide' => null,
+            'http_method_override' => false,
+            'trust_x_sendfile_type_header' => false,
+            'ide' => '%env(default::SYMFONY_IDE)%',
             'default_locale' => 'en',
             'enabled_locales' => [],
             'set_locale_from_accept_language' => false,
@@ -405,6 +468,7 @@ class ConfigurationTest extends TestCase
                 'dsn' => 'file:%kernel.cache_dir%/profiler',
                 'collect' => true,
                 'collect_parameter' => null,
+                'collect_serializer_data' => false,
             ],
             'translator' => [
                 'enabled' => !class_exists(FullStack::class),
@@ -524,6 +588,11 @@ class ConfigurationTest extends TestCase
                     ],
                 ],
             ],
+            'semaphore' => [
+                'enabled' => !class_exists(FullStack::class),
+                'resources' => [
+                ],
+            ],
             'messenger' => [
                 'enabled' => !class_exists(FullStack::class) && interface_exists(MessageBusInterface::class),
                 'routing' => [],
@@ -581,6 +650,10 @@ class ConfigurationTest extends TestCase
                 'default_uuid_version' => 6,
                 'name_based_uuid_version' => 5,
                 'time_based_uuid_version' => 6,
+            ],
+            'html_sanitizer' => [
+                'enabled' => !class_exists(FullStack::class) && class_exists(HtmlSanitizer::class),
+                'sanitizers' => [],
             ],
             'exceptions' => [],
         ];

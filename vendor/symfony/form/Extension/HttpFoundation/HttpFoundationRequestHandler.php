@@ -28,7 +28,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class HttpFoundationRequestHandler implements RequestHandlerInterface
 {
-    private $serverParams;
+    private ServerParams $serverParams;
 
     public function __construct(ServerParams $serverParams = null)
     {
@@ -41,7 +41,7 @@ class HttpFoundationRequestHandler implements RequestHandlerInterface
     public function handleRequest(FormInterface $form, mixed $request = null)
     {
         if (!$request instanceof Request) {
-            throw new UnexpectedTypeException($request, 'Symfony\Component\HttpFoundation\Request');
+            throw new UnexpectedTypeException($request, Request::class);
         }
 
         $name = $form->getName();

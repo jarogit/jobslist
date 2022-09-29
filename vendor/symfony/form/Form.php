@@ -71,15 +71,15 @@ use Symfony\Component\PropertyAccess\PropertyPathInterface;
  */
 class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterface
 {
-    private $config;
-    private $parent = null;
+    private FormConfigInterface $config;
+    private ?FormInterface $parent = null;
 
     /**
      * A map of FormInterface instances.
      *
      * @var OrderedHashMap<string, FormInterface>
      */
-    private $children;
+    private OrderedHashMap $children;
 
     /**
      * @var FormError[]
@@ -91,7 +91,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
     /**
      * The button that was used to submit the form.
      */
-    private $clickedButton = null;
+    private FormInterface|ClickableInterface|null $clickedButton = null;
 
     private mixed $modelData = null;
     private mixed $normData = null;
@@ -105,7 +105,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
     /**
      * The transformation failure generated during submission, if any.
      */
-    private $transformationFailure = null;
+    private ?TransformationFailedException $transformationFailure = null;
 
     /**
      * Whether the form's data has been initialized.
@@ -131,7 +131,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
      */
     private bool $inheritData;
 
-    private $propertyPath = null;
+    private ?PropertyPathInterface $propertyPath = null;
 
     /**
      * @throws LogicException if a data mapper is not provided for a compound form
@@ -196,7 +196,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
 
         $parent = $this->parent;
 
-        while ($parent && $parent->getConfig()->getInheritData()) {
+        while ($parent?->getConfig()->getInheritData()) {
             $parent = $parent->getParent();
         }
 
@@ -704,7 +704,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
 
         return FormUtil::isEmpty($this->modelData) ||
             // arrays, countables
-            ((\is_array($this->modelData) || $this->modelData instanceof \Countable) && 0 === \count($this->modelData)) ||
+            (is_countable($this->modelData) && 0 === \count($this->modelData)) ||
             // traversables that are not countable
             ($this->modelData instanceof \Traversable && 0 === iterator_count($this->modelData));
     }
@@ -817,10 +817,6 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
             }
 
             $child = (string) $child;
-
-            if (null !== $type && !\is_string($type)) {
-                throw new UnexpectedTypeException($type, 'string or null');
-            }
 
             // Never initialize child forms automatically
             $options['auto_initialize'] = false;

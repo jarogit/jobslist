@@ -48,6 +48,7 @@ class ScalarNormalizedTypesConfig implements \Symfony\Component\Config\Builder\C
     }
 
     /**
+     * @default {"enabled":null}
      * @return \Symfony\Config\ScalarNormalizedTypes\ObjectConfig|$this
      */
     public function object(mixed $value = []): \Symfony\Config\ScalarNormalizedTypes\ObjectConfig|static

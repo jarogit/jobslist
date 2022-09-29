@@ -63,7 +63,7 @@ class Connection implements ResetInterface
     protected $configuration = [];
     protected $driverConnection;
     protected $queueEmptiedAt;
-    private $schemaSynchronizer;
+    private ?SchemaSynchronizer $schemaSynchronizer;
     private bool $autoSetup;
 
     public function __construct(array $configuration, DBALConnection $driverConnection, SchemaSynchronizer $schemaSynchronizer = null)
@@ -501,8 +501,4 @@ class Connection implements ResetInterface
             ? $comparator->compareSchemas($from, $to)
             : $comparator->compare($from, $to);
     }
-}
-
-if (!class_exists(\Symfony\Component\Messenger\Transport\Doctrine\Connection::class, false)) {
-    class_alias(Connection::class, \Symfony\Component\Messenger\Transport\Doctrine\Connection::class);
 }

@@ -134,6 +134,7 @@ class MainConfiguration implements ConfigurationInterface
                         ->fixXmlConfig('ip')
                         ->fixXmlConfig('method')
                         ->children()
+                            ->scalarNode('request_matcher')->defaultNull()->end()
                             ->scalarNode('requires_channel')->defaultNull()->end()
                             ->scalarNode('path')
                                 ->defaultNull()
@@ -255,7 +256,7 @@ class MainConfiguration implements ConfigurationInterface
                                 return $requiredBadge;
                             }
 
-                            if (false === strpos($requiredBadge, '\\')) {
+                            if (!str_contains($requiredBadge, '\\')) {
                                 $fqcn = 'Symfony\Component\Security\Http\Authenticator\Passport\Badge\\'.$requiredBadge;
                                 if (class_exists($fqcn)) {
                                     return $fqcn;

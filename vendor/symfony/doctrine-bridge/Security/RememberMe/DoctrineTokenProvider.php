@@ -43,7 +43,7 @@ use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
  */
 class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifierInterface
 {
-    private $conn;
+    private Connection $conn;
 
     public function __construct(Connection $conn)
     {
@@ -163,7 +163,7 @@ class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifierInte
         // we also accept it as a valid value.
         try {
             $tmpToken = $this->loadTokenBySeries($tmpSeries);
-        } catch (TokenNotFoundException $e) {
+        } catch (TokenNotFoundException) {
             return false;
         }
 

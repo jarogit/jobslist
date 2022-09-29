@@ -203,11 +203,9 @@ class VarExporterTest extends TestCase
         $value = new \Error();
 
         $rt = new \ReflectionProperty(\Error::class, 'trace');
-        $rt->setAccessible(true);
         $rt->setValue($value, ['file' => __FILE__, 'line' => 123]);
 
         $rl = new \ReflectionProperty(\Error::class, 'line');
-        $rl->setAccessible(true);
         $rl->setValue($value, 234);
 
         yield ['error', $value];
@@ -234,10 +232,6 @@ class VarExporterTest extends TestCase
         yield ['private-constructor', PrivateConstructor::create('bar')];
 
         yield ['php74-serializable', new Php74Serializable()];
-
-        if (\PHP_VERSION_ID < 80100) {
-            return;
-        }
 
         yield ['unit-enum', [FooUnitEnum::Bar], true];
         yield ['readonly', new FooReadonly('k', 'v')];

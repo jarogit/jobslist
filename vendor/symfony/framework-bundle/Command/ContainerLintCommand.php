@@ -31,7 +31,7 @@ use Symfony\Component\HttpKernel\Kernel;
 #[AsCommand(name: 'lint:container', description: 'Ensure that arguments injected into services match type declarations')]
 final class ContainerLintCommand extends Command
 {
-    private $containerBuilder;
+    private ContainerBuilder $containerBuilder;
 
     /**
      * {@inheritdoc}
@@ -104,7 +104,6 @@ final class ContainerLintCommand extends Command
             (new XmlFileLoader($container = new ContainerBuilder($parameterBag = new EnvPlaceholderParameterBag()), new FileLocator()))->load($kernelContainer->getParameter('debug.container.dump'));
 
             $refl = new \ReflectionProperty($parameterBag, 'resolved');
-            $refl->setAccessible(true);
             $refl->setValue($parameterBag, true);
 
             $skippedIds = [];

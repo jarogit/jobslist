@@ -37,7 +37,7 @@ use Symfony\Component\Routing\RouteCollection;
  */
 class TextDescriptor extends Descriptor
 {
-    private $fileLinkFormatter;
+    private ?FileLinkFormatter $fileLinkFormatter;
 
     public function __construct(FileLinkFormatter $fileLinkFormatter = null)
     {
@@ -563,7 +563,7 @@ class TextDescriptor extends Descriptor
             } else {
                 $r = new \ReflectionFunction($controller);
             }
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException) {
             if (\is_array($controller)) {
                 $controller = implode('::', $controller);
             }
@@ -582,7 +582,7 @@ class TextDescriptor extends Descriptor
 
             try {
                 $r = new \ReflectionMethod($container->findDefinition($id)->getClass(), $method);
-            } catch (\ReflectionException $e) {
+            } catch (\ReflectionException) {
                 return $anchorText;
             }
         }

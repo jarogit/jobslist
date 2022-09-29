@@ -36,12 +36,12 @@ use Symfony\Component\VarDumper\Cloner\Data;
  */
 class SecurityDataCollector extends DataCollector implements LateDataCollectorInterface
 {
-    private $tokenStorage;
-    private $roleHierarchy;
-    private $logoutUrlGenerator;
-    private $accessDecisionManager;
-    private $firewallMap;
-    private $firewall;
+    private ?TokenStorageInterface $tokenStorage;
+    private ?RoleHierarchyInterface $roleHierarchy;
+    private ?LogoutUrlGenerator $logoutUrlGenerator;
+    private ?AccessDecisionManagerInterface $accessDecisionManager;
+    private ?FirewallMapInterface $firewallMap;
+    private ?TraceableFirewallListener $firewall;
     private bool $hasVarDumper;
 
     public function __construct(TokenStorageInterface $tokenStorage = null, RoleHierarchyInterface $roleHierarchy = null, LogoutUrlGenerator $logoutUrlGenerator = null, AccessDecisionManagerInterface $accessDecisionManager = null, FirewallMapInterface $firewallMap = null, TraceableFirewallListener $firewall = null)
@@ -110,10 +110,8 @@ class SecurityDataCollector extends DataCollector implements LateDataCollectorIn
 
             $logoutUrl = null;
             try {
-                if (null !== $this->logoutUrlGenerator) {
-                    $logoutUrl = $this->logoutUrlGenerator->getLogoutPath();
-                }
-            } catch (\Exception $e) {
+                $logoutUrl = $this->logoutUrlGenerator?->getLogoutPath();
+            } catch (\Exception) {
                 // fail silently when the logout URL cannot be generated
             }
 

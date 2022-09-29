@@ -16,7 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class FormFactory implements FormFactoryInterface
 {
-    private $registry;
+    private FormRegistryInterface $registry;
 
     public function __construct(FormRegistryInterface $registry)
     {
@@ -91,8 +91,8 @@ class FormFactory implements FormFactoryInterface
 
         $type = $typeGuess ? $typeGuess->getType() : TextType::class;
 
-        $maxLength = $maxLengthGuess ? $maxLengthGuess->getValue() : null;
-        $pattern = $patternGuess ? $patternGuess->getValue() : null;
+        $maxLength = $maxLengthGuess?->getValue();
+        $pattern = $patternGuess?->getValue();
 
         if (null !== $pattern) {
             $options = array_replace_recursive(['attr' => ['pattern' => $pattern]], $options);

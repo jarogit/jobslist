@@ -23,10 +23,10 @@ use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  */
-final class EmailMessage implements MessageInterface
+class EmailMessage implements MessageInterface
 {
-    private $message;
-    private $envelope;
+    private RawMessage $message;
+    private ?Envelope $envelope;
 
     public function __construct(RawMessage $message, Envelope $envelope = null)
     {

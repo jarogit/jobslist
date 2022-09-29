@@ -35,12 +35,12 @@ use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 #[AsCommand(name: 'debug:form', description: 'Display form type information')]
 class DebugCommand extends Command
 {
-    private $formRegistry;
+    private FormRegistryInterface $formRegistry;
     private array $namespaces;
     private array $types;
     private array $extensions;
     private array $guessers;
-    private $fileLinkFormatter;
+    private ?FileLinkFormatter $fileLinkFormatter;
 
     public function __construct(FormRegistryInterface $formRegistry, array $namespaces = ['Symfony\Component\Form\Extension\Core\Type'], array $types = [], array $extensions = [], array $guessers = [], FileLinkFormatter $fileLinkFormatter = null)
     {
@@ -209,7 +209,6 @@ EOF
     {
         $coreExtension = new CoreExtension();
         $loadTypesRefMethod = (new \ReflectionObject($coreExtension))->getMethod('loadTypes');
-        $loadTypesRefMethod->setAccessible(true);
         $coreTypes = $loadTypesRefMethod->invoke($coreExtension);
         $coreTypes = array_map(function (FormTypeInterface $type) { return \get_class($type); }, $coreTypes);
         sort($coreTypes);

@@ -589,7 +589,7 @@ class EnvVarProcessorTest extends TestCase
         $container->compile();
 
         $processor = new EnvVarProcessor($container);
-        $getEnv = \Closure::fromCallable([$processor, 'getEnv']);
+        $getEnv = $processor->getEnv(...);
 
         $result = $processor->getEnv('resolve', 'foo', function ($name) use ($getEnv) {
             return 'foo' === $name ? '%env(BAR)%' : $getEnv('string', $name, function () {});
@@ -607,7 +607,7 @@ class EnvVarProcessorTest extends TestCase
         $container->compile();
 
         $processor = new EnvVarProcessor($container);
-        $getEnv = \Closure::fromCallable([$processor, 'getEnv']);
+        $getEnv = $processor->getEnv(...);
 
         $result = $processor->getEnv('resolve', 'foo', function ($name) use ($getEnv) {
             return 'foo' === $name ? '%env(BAR)%' : $getEnv('string', $name, function () {});

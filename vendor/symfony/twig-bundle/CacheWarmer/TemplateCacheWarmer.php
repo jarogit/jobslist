@@ -24,8 +24,8 @@ use Twig\Error\Error;
  */
 class TemplateCacheWarmer implements CacheWarmerInterface, ServiceSubscriberInterface
 {
-    private $container;
-    private $twig;
+    private ContainerInterface $container;
+    private Environment $twig;
     private iterable $iterator;
 
     public function __construct(ContainerInterface $container, iterable $iterator)
@@ -53,7 +53,7 @@ class TemplateCacheWarmer implements CacheWarmerInterface, ServiceSubscriberInte
                 if (\is_callable([$template, 'unwrap'])) {
                     $files[] = (new \ReflectionClass($template->unwrap()))->getFileName();
                 }
-            } catch (Error $e) {
+            } catch (Error) {
                 /*
                  * Problem during compilation, give up for this template (e.g. syntax errors).
                  * Failing silently here allows to ignore templates that rely on functions that aren't available in

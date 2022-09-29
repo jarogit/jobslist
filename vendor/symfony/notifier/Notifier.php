@@ -28,7 +28,7 @@ final class Notifier implements NotifierInterface
 {
     private array $adminRecipients = [];
     private array|ContainerInterface $channels;
-    private $policy;
+    private ?ChannelPolicyInterface $policy;
 
     /**
      * @param ChannelInterface[]|ContainerInterface $channels
@@ -65,6 +65,9 @@ final class Notifier implements NotifierInterface
         return $this->adminRecipients;
     }
 
+    /**
+     * @return iterable<ChannelInterface, string|null>
+     */
     private function getChannels(Notification $notification, RecipientInterface $recipient): iterable
     {
         $channels = $notification->getChannels($recipient);

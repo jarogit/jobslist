@@ -1,5 +1,4 @@
-#FROM php:8.1.11RC1-fpm-buster
-FROM php:8.0.15-fpm-buster
+FROM php:8.1.11RC1-fpm-buster
 WORKDIR "/sources"
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"

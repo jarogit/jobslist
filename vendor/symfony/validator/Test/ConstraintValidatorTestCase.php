@@ -39,6 +39,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * A test case to ease testing Constraint Validators.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
+ * @template T of ConstraintValidatorInterface
  */
 abstract class ConstraintValidatorTestCase extends TestCase
 {
@@ -48,7 +50,7 @@ abstract class ConstraintValidatorTestCase extends TestCase
     protected $context;
 
     /**
-     * @var ConstraintValidatorInterface
+     * @var T
      */
     protected $validator;
 
@@ -298,7 +300,7 @@ abstract class ConstraintValidatorTestCase extends TestCase
 
 final class ConstraintViolationAssertion
 {
-    private $context;
+    private ExecutionContextInterface $context;
 
     /**
      * @var ConstraintViolationAssertion[]
@@ -311,7 +313,7 @@ final class ConstraintViolationAssertion
     private string $propertyPath = 'property.path';
     private ?int $plural = null;
     private ?string $code = null;
-    private $constraint;
+    private ?Constraint $constraint;
     private mixed $cause = null;
 
     /**
@@ -455,7 +457,7 @@ final class ConstraintViolationAssertion
  */
 class AssertingContextualValidator implements ContextualValidatorInterface
 {
-    private $context;
+    private ExecutionContextInterface $context;
     private bool $expectNoValidate = false;
     private int $atPathCalls = -1;
     private array $expectedAtPath = [];

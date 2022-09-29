@@ -12,6 +12,8 @@
 namespace Symfony\Bridge\Monolog\Handler\FingersCrossed;
 
 use Monolog\Handler\FingersCrossed\ActivationStrategyInterface;
+use Monolog\LogRecord;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -26,9 +28,9 @@ final class HttpCodeActivationStrategy implements ActivationStrategyInterface
      * @param array $exclusions each exclusion must have a "code" and "urls" keys
      */
     public function __construct(
-        private $requestStack,
+        private RequestStack $requestStack,
         private array $exclusions,
-        private $inner,
+        private ActivationStrategyInterface $inner,
     ) {
         foreach ($exclusions as $exclusion) {
             if (!\array_key_exists('code', $exclusion)) {
@@ -40,7 +42,7 @@ final class HttpCodeActivationStrategy implements ActivationStrategyInterface
         }
     }
 
-    public function isHandlerActivated(array $record): bool
+    public function isHandlerActivated(array|LogRecord $record): bool
     {
         $isActivated = $this->inner->isHandlerActivated($record);
 

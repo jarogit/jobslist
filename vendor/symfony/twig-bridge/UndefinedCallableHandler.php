@@ -25,6 +25,7 @@ class UndefinedCallableHandler
     private const FILTER_COMPONENTS = [
         'humanize' => 'form',
         'trans' => 'translation',
+        'sanitize_html' => 'html-sanitizer',
         'yaml_encode' => 'yaml',
         'yaml_dump' => 'yaml',
     ];
@@ -62,6 +63,7 @@ class UndefinedCallableHandler
     ];
 
     private const FULL_STACK_ENABLE = [
+        'html-sanitizer' => 'enable "framework.html_sanitizer"',
         'form' => 'enable "framework.form"',
         'security-core' => 'add the "SecurityBundle"',
         'security-http' => 'add the "SecurityBundle"',

@@ -25,8 +25,8 @@ use Twig\Environment;
  */
 class TwigErrorRenderer implements ErrorRendererInterface
 {
-    private $twig;
-    private $fallbackErrorRenderer;
+    private Environment $twig;
+    private HtmlErrorRenderer $fallbackErrorRenderer;
     private \Closure|bool $debug;
 
     /**
@@ -36,7 +36,7 @@ class TwigErrorRenderer implements ErrorRendererInterface
     {
         $this->twig = $twig;
         $this->fallbackErrorRenderer = $fallbackErrorRenderer ?? new HtmlErrorRenderer();
-        $this->debug = !\is_callable($debug) || $debug instanceof \Closure ? $debug : \Closure::fromCallable($debug);
+        $this->debug = \is_bool($debug) ? $debug : $debug(...);
     }
 
     /**

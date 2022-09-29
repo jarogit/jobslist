@@ -18,16 +18,11 @@ use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
 /**
  * @requires extension fileinfo
+ *
+ * @extends ConstraintValidatorTestCase<ImageValidator>
  */
 class ImageValidatorTest extends ConstraintValidatorTestCase
 {
-    protected $context;
-
-    /**
-     * @var ImageValidator
-     */
-    protected $validator;
-
     protected $path;
     protected $image;
     protected $imageLandscape;
@@ -550,6 +545,38 @@ class ImageValidatorTest extends ConstraintValidatorTestCase
         ])];
         yield 'Named arguments' => [
             new Image(detectCorrupted: true, corruptedMessage: 'myMessage'),
+        ];
+    }
+
+    /**
+     * @dataProvider provideInvalidMimeTypeWithNarrowedSet
+     */
+    public function testInvalidMimeTypeWithNarrowedSet(Image $constraint)
+    {
+        $this->validator->validate($this->image, $constraint);
+
+        $this->buildViolation('The mime type of the file is invalid ({{ type }}). Allowed mime types are {{ types }}.')
+            ->setParameter('{{ file }}', sprintf('"%s"', $this->image))
+            ->setParameter('{{ type }}', '"image/gif"')
+            ->setParameter('{{ types }}', '"image/jpeg", "image/png"')
+            ->setParameter('{{ name }}', '"test.gif"')
+            ->setCode(Image::INVALID_MIME_TYPE_ERROR)
+            ->assertRaised();
+    }
+
+    public function provideInvalidMimeTypeWithNarrowedSet()
+    {
+        yield 'Doctrine style' => [new Image([
+            'mimeTypes' => [
+                'image/jpeg',
+                'image/png',
+            ],
+        ])];
+        yield 'Named arguments' => [
+            new Image(mimeTypes: [
+                'image/jpeg',
+                'image/png',
+            ]),
         ];
     }
 }

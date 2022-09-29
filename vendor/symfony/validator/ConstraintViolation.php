@@ -25,7 +25,7 @@ class ConstraintViolation implements ConstraintViolationInterface
     private mixed $root;
     private ?string $propertyPath;
     private mixed $invalidValue;
-    private $constraint;
+    private ?Constraint $constraint;
     private ?string $code;
     private mixed $cause;
 
@@ -64,7 +64,7 @@ class ConstraintViolation implements ConstraintViolationInterface
     }
 
     /**
-     * Converts the violation into a string for debugging purposes.
+     * {@inheritdoc}
      */
     public function __toString(): string
     {

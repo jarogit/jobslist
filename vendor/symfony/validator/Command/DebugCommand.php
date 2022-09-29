@@ -34,7 +34,7 @@ use Symfony\Component\Validator\Mapping\Factory\MetadataFactoryInterface;
 #[AsCommand(name: 'debug:validator', description: 'Display validation constraints for classes')]
 class DebugCommand extends Command
 {
-    private $validator;
+    private MetadataFactoryInterface $validator;
 
     public function __construct(MetadataFactoryInterface $validator)
     {
@@ -71,7 +71,7 @@ EOF
             foreach ($this->getResourcesByPath($class) as $class) {
                 $this->dumpValidatorsForClass($input, $output, $class);
             }
-        } catch (DirectoryNotFoundException $exception) {
+        } catch (DirectoryNotFoundException) {
             $io = new SymfonyStyle($input, $output);
             $io->error(sprintf('Neither class nor path were found with "%s" argument.', $input->getArgument('class')));
 

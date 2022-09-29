@@ -36,7 +36,7 @@ use Twig\Loader\FilesystemLoader;
 #[AsCommand(name: 'debug:twig', description: 'Show a list of twig functions, filters, globals and tests')]
 class DebugCommand extends Command
 {
-    private $twig;
+    private Environment $twig;
     private ?string $projectDir;
     private array $bundlesMetadata;
     private ?string $twigDefaultPath;
@@ -46,7 +46,7 @@ class DebugCommand extends Command
      */
     private array $filesystemLoaders;
 
-    private $fileLinkFormatter;
+    private ?FileLinkFormatter $fileLinkFormatter;
 
     public function __construct(Environment $twig, string $projectDir = null, array $bundlesMetadata = [], string $twigDefaultPath = null, FileLinkFormatter $fileLinkFormatter = null)
     {
@@ -294,7 +294,7 @@ EOF
             }
 
             foreach ($namespaces as $namespace) {
-                $paths = array_map([$this, 'getRelativePath'], $loader->getPaths($namespace));
+                $paths = array_map($this->getRelativePath(...), $loader->getPaths($namespace));
 
                 if (FilesystemLoader::MAIN_NAMESPACE === $namespace) {
                     $namespace = '(None)';

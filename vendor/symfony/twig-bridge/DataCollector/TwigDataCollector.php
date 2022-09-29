@@ -28,8 +28,8 @@ use Twig\Profiler\Profile;
  */
 class TwigDataCollector extends DataCollector implements LateDataCollectorInterface
 {
-    private $profile;
-    private $twig;
+    private Profile $profile;
+    private ?Environment $twig;
     private array $computed;
 
     public function __construct(Profile $profile, Environment $twig = null)
@@ -71,7 +71,7 @@ class TwigDataCollector extends DataCollector implements LateDataCollectorInterf
             if ($profile->isTemplate()) {
                 try {
                     $template = $this->twig->load($name = $profile->getName());
-                } catch (LoaderError $e) {
+                } catch (LoaderError) {
                     $template = null;
                 }
 
@@ -140,7 +140,7 @@ class TwigDataCollector extends DataCollector implements LateDataCollectorInterf
 
     public function getProfile()
     {
-        return $this->profile ??= unserialize($this->data['profile'], ['allowed_classes' => ['Twig_Profiler_Profile', 'Twig\Profiler\Profile']]);
+        return $this->profile ??= unserialize($this->data['profile'], ['allowed_classes' => ['Twig_Profiler_Profile', Profile::class]]);
     }
 
     private function getComputedData(string $index)

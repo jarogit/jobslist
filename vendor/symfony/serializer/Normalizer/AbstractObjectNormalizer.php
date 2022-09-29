@@ -135,8 +135,10 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
 
     /**
      * {@inheritdoc}
+     *
+     * @param array $context
      */
-    public function supportsNormalization(mixed $data, string $format = null)
+    public function supportsNormalization(mixed $data, string $format = null /* , array $context = [] */)
     {
         return \is_object($data) && !$data instanceof \Traversable;
     }
@@ -160,7 +162,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
         $stack = [];
         $attributes = $this->getAttributes($object, $format, $context);
         $class = $this->objectClassResolver ? ($this->objectClassResolver)($object) : \get_class($object);
-        $attributesMetadata = $this->classMetadataFactory ? $this->classMetadataFactory->getMetadataFor($class)->getAttributesMetadata() : null;
+        $attributesMetadata = $this->classMetadataFactory?->getMetadataFor($class)->getAttributesMetadata();
         if (isset($context[self::MAX_DEPTH_HANDLER])) {
             $maxDepthHandler = $context[self::MAX_DEPTH_HANDLER];
             if (!\is_callable($maxDepthHandler)) {
@@ -216,7 +218,8 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
             $data = $this->updateData($data, $attribute, $this->serializer->normalize($attributeValue, $format, $childContext), $class, $format, $attributeContext);
         }
 
-        if (isset($context[self::PRESERVE_EMPTY_OBJECTS]) && !\count($data)) {
+        $preserveEmptyObjects = $context[self::PRESERVE_EMPTY_OBJECTS] ?? $this->defaultContext[self::PRESERVE_EMPTY_OBJECTS] ?? false;
+        if ($preserveEmptyObjects && !\count($data)) {
             return new \ArrayObject();
         }
 
@@ -334,8 +337,10 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
 
     /**
      * {@inheritdoc}
+     *
+     * @param array $context
      */
-    public function supportsDenormalization(mixed $data, string $type, string $format = null)
+    public function supportsDenormalization(mixed $data, string $type, string $format = null /* , array $context = [] */)
     {
         return class_exists($type) || (interface_exists($type, false) && $this->classDiscriminatorResolver && null !== $this->classDiscriminatorResolver->getMappingForClass($type));
     }
@@ -381,7 +386,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
             if ($attributeContext[self::DEEP_OBJECT_TO_POPULATE] ?? $this->defaultContext[self::DEEP_OBJECT_TO_POPULATE] ?? false) {
                 try {
                     $attributeContext[self::OBJECT_TO_POPULATE] = $this->getAttributeValue($object, $attribute, $format, $attributeContext);
-                } catch (NoSuchPropertyException $e) {
+                } catch (NoSuchPropertyException) {
                 }
             }
 
@@ -505,16 +510,12 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
                                 return (float) $data;
                             }
 
-                            switch ($data) {
-                                case 'NaN':
-                                    return \NAN;
-                                case 'INF':
-                                    return \INF;
-                                case '-INF':
-                                    return -\INF;
-                                default:
-                                    throw NotNormalizableValueException::createForUnexpectedDataType(sprintf('The type of the "%s" attribute for class "%s" must be float ("%s" given).', $attribute, $currentClass, $data), $data, [Type::BUILTIN_TYPE_FLOAT], $context['deserialization_path'] ?? null);
-                            }
+                            return match ($data) {
+                                'NaN' => \NAN,
+                                'INF' => \INF,
+                                '-INF' => -\INF,
+                                default => throw NotNormalizableValueException::createForUnexpectedDataType(sprintf('The type of the "%s" attribute for class "%s" must be float ("%s" given).', $attribute, $currentClass, $data), $data, [Type::BUILTIN_TYPE_FLOAT], $context['deserialization_path'] ?? null),
+                            };
                     }
                 }
 
@@ -753,7 +754,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
                 'context' => $context,
                 'ignored' => $context[self::IGNORED_ATTRIBUTES] ?? $this->defaultContext[self::IGNORED_ATTRIBUTES],
             ]));
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // The context cannot be serialized, skip the cache
             return false;
         }

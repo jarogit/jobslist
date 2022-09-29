@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
  */
 abstract class AbstractComparisonValidator extends ConstraintValidator
 {
-    private $propertyAccessor;
+    private ?PropertyAccessorInterface $propertyAccessor;
 
     public function __construct(PropertyAccessorInterface $propertyAccessor = null)
     {
@@ -71,7 +71,7 @@ abstract class AbstractComparisonValidator extends ConstraintValidator
 
             try {
                 $comparedValue = new $dateTimeClass($comparedValue);
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 throw new ConstraintDefinitionException(sprintf('The compared value "%s" could not be converted to a "%s" instance in the "%s" constraint.', $comparedValue, $dateTimeClass, get_debug_type($constraint)));
             }
         }

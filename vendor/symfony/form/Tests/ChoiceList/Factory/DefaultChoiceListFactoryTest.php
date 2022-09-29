@@ -728,11 +728,11 @@ class DefaultChoiceListFactoryTest extends TestCase
             null, // index
             null, // group
             function ($object, $key) {
-                switch ($key) {
-                    case 'B': return ['attr1' => 'value1'];
-                    case 'C': return ['attr2' => 'value2'];
-                    default: return [];
-                }
+                return match ($key) {
+                    'B' => ['attr1' => 'value1'],
+                    'C' => ['attr2' => 'value2'],
+                    default => [],
+                };
             }
         );
 
@@ -748,11 +748,11 @@ class DefaultChoiceListFactoryTest extends TestCase
             null, // index
             null, // group
             function ($object, $key, $value) {
-                switch ($value) {
-                    case '1': return ['attr1' => 'value1'];
-                    case '2': return ['attr2' => 'value2'];
-                    default: return [];
-                }
+                return match ($value) {
+                    '1' => ['attr1' => 'value1'],
+                    '2' => ['attr2' => 'value2'],
+                    default => [],
+                };
             }
         );
 
@@ -848,10 +848,10 @@ class DefaultChoiceListFactoryTest extends TestCase
             null, // group
             null, // attr
             function ($object, $key) {
-                switch ($key) {
-                    case 'D': return ['%placeholder1%' => 'value1'];
-                    default: return [];
-                }
+                return match ($key) {
+                    'D' => ['%placeholder1%' => 'value1'],
+                    default => [],
+                };
             }
         );
 
@@ -868,10 +868,10 @@ class DefaultChoiceListFactoryTest extends TestCase
             null, // group
             null, // attr
             function ($object, $key, $value) {
-                switch ($value) {
-                    case '3': return ['%placeholder1%' => 'value1'];
-                    default: return [];
-                }
+                return match ($value) {
+                    '3' => ['%placeholder1%' => 'value1'],
+                    default => [],
+                };
             }
         );
 

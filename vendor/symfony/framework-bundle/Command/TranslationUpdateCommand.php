@@ -50,9 +50,9 @@ class TranslationUpdateCommand extends Command
         'xlf20' => ['xlf', '2.0'],
     ];
 
-    private $writer;
-    private $reader;
-    private $extractor;
+    private TranslationWriterInterface $writer;
+    private TranslationReaderInterface $reader;
+    private ExtractorInterface $extractor;
     private string $defaultLocale;
     private ?string $defaultTransPath;
     private ?string $defaultViewsPath;
@@ -186,7 +186,7 @@ EOF
                     $codePaths[] = $this->defaultViewsPath;
                 }
                 $currentName = $foundBundle->getName();
-            } catch (\InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException) {
                 // such a bundle does not exist, so treat the argument as path
                 $path = $input->getArgument('bundle');
 

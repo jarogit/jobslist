@@ -12,6 +12,7 @@
 namespace Symfony\Bridge\Monolog\Processor;
 
 use Monolog\Logger;
+use Monolog\LogRecord;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
@@ -19,16 +20,18 @@ use Symfony\Contracts\Service\ResetInterface;
 
 class DebugProcessor implements DebugLoggerInterface, ResetInterface
 {
+    use CompatibilityProcessor;
+
     private array $records = [];
     private array $errorCount = [];
-    private $requestStack;
+    private ?RequestStack $requestStack;
 
     public function __construct(RequestStack $requestStack = null)
     {
         $this->requestStack = $requestStack;
     }
 
-    public function __invoke(array $record)
+    private function doInvoke(array|LogRecord $record): array|LogRecord
     {
         $hash = $this->requestStack && ($request = $this->requestStack->getCurrentRequest()) ? spl_object_hash($request) : '';
 

@@ -23,9 +23,9 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 final class Chatter implements ChatterInterface
 {
-    private $transport;
-    private $bus;
-    private $dispatcher;
+    private TransportInterface $transport;
+    private ?MessageBusInterface $bus;
+    private ?EventDispatcherInterface $dispatcher;
 
     public function __construct(TransportInterface $transport, MessageBusInterface $bus = null, EventDispatcherInterface $dispatcher = null)
     {
@@ -50,9 +50,7 @@ final class Chatter implements ChatterInterface
             return $this->transport->send($message);
         }
 
-        if (null !== $this->dispatcher) {
-            $this->dispatcher->dispatch(new MessageEvent($message, true));
-        }
+        $this->dispatcher?->dispatch(new MessageEvent($message, true));
 
         $this->bus->dispatch($message);
 

@@ -50,9 +50,9 @@ class TranslationDebugCommand extends Command
     public const MESSAGE_UNUSED = 1;
     public const MESSAGE_EQUALS_FALLBACK = 2;
 
-    private $translator;
-    private $reader;
-    private $extractor;
+    private TranslatorInterface $translator;
+    private TranslationReaderInterface $reader;
+    private ExtractorInterface $extractor;
     private ?string $defaultTransPath;
     private ?string $defaultViewsPath;
     private array $transPaths;
@@ -153,7 +153,7 @@ EOF
                 if ($this->defaultViewsPath) {
                     $codePaths[] = $this->defaultViewsPath;
                 }
-            } catch (\InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException) {
                 // such a bundle does not exist, so treat the argument as path
                 $path = $input->getArgument('bundle');
 

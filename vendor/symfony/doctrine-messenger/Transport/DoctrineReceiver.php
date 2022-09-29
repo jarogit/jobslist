@@ -30,8 +30,8 @@ class DoctrineReceiver implements ListableReceiverInterface, MessageCountAwareIn
 {
     private const MAX_RETRIES = 3;
     private int $retryingSafetyCounter = 0;
-    private $connection;
-    private $serializer;
+    private Connection $connection;
+    private SerializerInterface $serializer;
 
     public function __construct(Connection $connection, SerializerInterface $serializer = null)
     {
@@ -168,8 +168,4 @@ class DoctrineReceiver implements ListableReceiverInterface, MessageCountAwareIn
             new TransportMessageIdStamp($data['id'])
         );
     }
-}
-
-if (!class_exists(\Symfony\Component\Messenger\Transport\Doctrine\DoctrineReceiver::class, false)) {
-    class_alias(DoctrineReceiver::class, \Symfony\Component\Messenger\Transport\Doctrine\DoctrineReceiver::class);
 }

@@ -175,7 +175,7 @@ class ContextListenerTest extends TestCase
 
         $dispatcher->expects($this->once())
             ->method('addListener')
-            ->with(KernelEvents::RESPONSE, [$listener, 'onKernelResponse']);
+            ->with(KernelEvents::RESPONSE, $listener->onKernelResponse(...));
 
         $listener(new RequestEvent($this->createMock(HttpKernelInterface::class), new Request(), HttpKernelInterface::MAIN_REQUEST));
     }
@@ -197,7 +197,7 @@ class ContextListenerTest extends TestCase
 
         $dispatcher->expects($this->once())
             ->method('removeListener')
-            ->with(KernelEvents::RESPONSE, [$listener, 'onKernelResponse']);
+            ->with(KernelEvents::RESPONSE, $listener->onKernelResponse(...));
 
         $listener->onKernelResponse($event);
     }
@@ -299,7 +299,7 @@ class ContextListenerTest extends TestCase
         $usageIndex = $session->getUsageIndex();
 
         $tokenStorage = new TokenStorage();
-        $listener = new ContextListener($tokenStorage, [], 'context_key', null, null, null, [$tokenStorage, 'getToken']);
+        $listener = new ContextListener($tokenStorage, [], 'context_key', null, null, null, $tokenStorage->getToken(...));
         $listener(new RequestEvent($this->createMock(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST));
 
         $this->assertSame($usageIndex, $session->getUsageIndex());
@@ -318,7 +318,7 @@ class ContextListenerTest extends TestCase
 
         $tokenStorage = new TokenStorage();
 
-        $listener = new ContextListener($tokenStorage, [], 'context_key', null, null, null, [$tokenStorage, 'getToken']);
+        $listener = new ContextListener($tokenStorage, [], 'context_key', null, null, null, $tokenStorage->getToken(...));
         $listener(new RequestEvent($this->createMock(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST));
     }
 
@@ -336,7 +336,7 @@ class ContextListenerTest extends TestCase
         $dispatcher = new EventDispatcher();
         $httpKernel = $this->createMock(HttpKernelInterface::class);
 
-        $listener = new ContextListener($tokenStorage, [], 'session', null, $dispatcher, null, \Closure::fromCallable([$tokenStorage, 'getToken']));
+        $listener = new ContextListener($tokenStorage, [], 'session', null, $dispatcher, null, $tokenStorage->getToken(...));
         $this->assertEmpty($dispatcher->getListeners());
 
         $listener(new RequestEvent($httpKernel, $request, HttpKernelInterface::MAIN_REQUEST));
@@ -378,7 +378,7 @@ class ContextListenerTest extends TestCase
             new Response()
         );
 
-        $listener = new ContextListener($tokenStorage, [], 'session', null, new EventDispatcher(), null, [$tokenStorage, 'enableUsageTracking']);
+        $listener = new ContextListener($tokenStorage, [], 'session', null, new EventDispatcher(), null, $tokenStorage->enableUsageTracking(...));
         $listener->onKernelResponse($event);
 
         if ($session->getId() === $sessionId) {
@@ -409,7 +409,7 @@ class ContextListenerTest extends TestCase
         $tokenStorage = new UsageTrackingTokenStorage($tokenStorage, new class($factories) implements ContainerInterface {
             use ServiceLocatorTrait;
         });
-        $sessionTrackerEnabler = [$tokenStorage, 'enableUsageTracking'];
+        $sessionTrackerEnabler = $tokenStorage->enableUsageTracking(...);
 
         $listener = new ContextListener($tokenStorage, $userProviders, 'context_key', null, null, null, $sessionTrackerEnabler);
 

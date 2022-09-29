@@ -406,16 +406,13 @@ class EventDispatcherTest extends TestCase
         $this->assertTrue($testLoaded);
     }
 
-    /**
-     * @requires PHP 8.1
-     */
     public function testNamedClosures()
     {
         $listener = new TestEventListener();
 
-        $callback1 = \Closure::fromCallable($listener);
-        $callback2 = \Closure::fromCallable($listener);
-        $callback3 = \Closure::fromCallable(new TestEventListener());
+        $callback1 = $listener(...);
+        $callback2 = $listener(...);
+        $callback3 = (new TestEventListener())(...);
 
         $this->assertNotSame($callback1, $callback2);
         $this->assertNotSame($callback1, $callback3);

@@ -83,7 +83,7 @@ abstract class AbstractUidType extends Type
 
         try {
             return $this->getUidClass()::fromString($value)->$toString();
-        } catch (\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException) {
             throw ConversionException::conversionFailed($value, $this->getName());
         }
     }

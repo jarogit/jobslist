@@ -12,6 +12,7 @@
 namespace Symfony\Component\Messenger\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpKernel\DependencyInjection\ServicesResetter;
@@ -41,7 +42,6 @@ use Symfony\Component\Messenger\Tests\Fixtures\DummyMessage;
 use Symfony\Component\Messenger\Transport\Receiver\QueueReceiverInterface;
 use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
 use Symfony\Component\Messenger\Worker;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
@@ -67,8 +67,23 @@ class WorkerTest extends TestCase
                 return $envelopes[] = $envelope;
             });
 
-        $dispatcher = new EventDispatcher();
-        $dispatcher->addSubscriber(new StopWorkerOnMessageLimitListener(2));
+        $dispatcher = new class() implements EventDispatcherInterface {
+            private StopWorkerOnMessageLimitListener $listener;
+
+            public function __construct()
+            {
+                $this->listener = new StopWorkerOnMessageLimitListener(2);
+            }
+
+            public function dispatch(object $event): object
+            {
+                if ($event instanceof WorkerRunningEvent) {
+                    $this->listener->onWorkerRunning($event);
+                }
+
+                return $event;
+            }
+        };
 
         $worker = new Worker(['transport' => $receiver], $bus, $dispatcher);
         $worker->run();
@@ -194,6 +209,25 @@ class WorkerTest extends TestCase
             });
 
         $worker = new Worker([$receiver], $bus, $eventDispatcher);
+        $worker->run();
+    }
+
+    public function testWorkerWithoutDispatcher()
+    {
+        $envelope = new Envelope(new DummyMessage('Hello'));
+        $receiver = new DummyReceiver([[$envelope]]);
+
+        $bus = $this->createMock(MessageBusInterface::class);
+        $worker = new Worker([$receiver], $bus);
+
+        $bus->expects($this->once())
+            ->method('dispatch')
+            ->willReturnCallback(static function () use ($worker, $envelope) {
+                $worker->stop();
+
+                return $envelope;
+            });
+
         $worker->run();
     }
 

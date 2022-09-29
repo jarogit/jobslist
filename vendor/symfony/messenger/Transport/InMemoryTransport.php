@@ -45,7 +45,7 @@ class InMemoryTransport implements TransportInterface, ResetInterface
     private array $queue = [];
 
     private int $nextId = 1;
-    private $serializer;
+    private ?SerializerInterface $serializer;
 
     public function __construct(SerializerInterface $serializer = null)
     {
@@ -151,9 +151,6 @@ class InMemoryTransport implements TransportInterface, ResetInterface
             return $messagesEncoded;
         }
 
-        return array_map(
-            [$this->serializer, 'decode'],
-            $messagesEncoded
-        );
+        return array_map($this->serializer->decode(...), $messagesEncoded);
     }
 }

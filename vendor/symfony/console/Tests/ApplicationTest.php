@@ -13,6 +13,7 @@ namespace Symfony\Component\Console\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\LazyCommand;
@@ -236,7 +237,6 @@ class ApplicationTest extends TestCase
         // simulate --help
         $r = new \ReflectionObject($application);
         $p = $r->getProperty('wantHelps');
-        $p->setAccessible(true);
         $p->setValue($application, true);
         $command = $application->get('foo:bar');
         $this->assertInstanceOf(HelpCommand::class, $command, '->get() returns the help command if --help is provided as the input');
@@ -2070,13 +2070,12 @@ class DisabledCommand extends Command
     }
 }
 
+#[AsCommand(name: 'signal')]
 class BaseSignableCommand extends Command
 {
     public $signaled = false;
     public $loop = 1000;
     private $emitsSignal;
-
-    protected static $defaultName = 'signal';
 
     public function __construct(bool $emitsSignal = true)
     {
@@ -2101,10 +2100,9 @@ class BaseSignableCommand extends Command
     }
 }
 
+#[AsCommand(name: 'signal')]
 class SignableCommand extends BaseSignableCommand implements SignalableCommandInterface
 {
-    protected static $defaultName = 'signal';
-
     public function getSubscribedSignals(): array
     {
         return SignalRegistry::isSupported() ? [\SIGUSR1] : [];

@@ -27,8 +27,8 @@ use Symfony\Component\Security\Http\AccessMapInterface;
  */
 class ChannelListener extends AbstractListener
 {
-    private $map;
-    private $logger;
+    private AccessMapInterface $map;
+    private ?LoggerInterface $logger;
     private int $httpPort;
     private int $httpsPort;
 
@@ -62,9 +62,7 @@ class ChannelListener extends AbstractListener
         }
 
         if ('http' === $channel && $request->isSecure()) {
-            if (null !== $this->logger) {
-                $this->logger->info('Redirecting to HTTP.');
-            }
+            $this->logger?->info('Redirecting to HTTP.');
 
             return true;
         }

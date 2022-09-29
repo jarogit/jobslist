@@ -12,6 +12,8 @@
 namespace Symfony\Bridge\Monolog\Handler\FingersCrossed;
 
 use Monolog\Handler\FingersCrossed\ActivationStrategyInterface;
+use Monolog\LogRecord;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -26,14 +28,14 @@ final class NotFoundActivationStrategy implements ActivationStrategyInterface
     private string $exclude;
 
     public function __construct(
-        private $requestStack,
+        private RequestStack $requestStack,
         array $excludedUrls,
-        private $inner
+        private ActivationStrategyInterface $inner
     ) {
         $this->exclude = '{('.implode('|', $excludedUrls).')}i';
     }
 
-    public function isHandlerActivated(array $record): bool
+    public function isHandlerActivated(array|LogRecord $record): bool
     {
         $isActivated = $this->inner->isHandlerActivated($record);
 
